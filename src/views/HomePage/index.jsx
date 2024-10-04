@@ -17,7 +17,7 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      <div>
+      <div className="mt-5">
         <CommonSlider settings={sliderSettings} slides={allProducts} />
       </div>
       {/* <div className="px-6 py-3">
