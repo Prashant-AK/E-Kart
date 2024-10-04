@@ -1,16 +1,28 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import useCustomNavigation from "../../hooks/useCustomNavigation";
+import { useUserSignupMutation } from "../../store/auth/authApiSlice";
 export default function SignupPage() {
   const [username, setUsername] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
-
-  const handleSubmit = (e) => {
+  const navigate = useCustomNavigation();
+  const [userSignup, { data: signupData, isLoading }] = useUserSignupMutation();
+  useEffect(() => {
+    if (signupData) {
+      navigate("/login");
+    }
+  }, [signupData]);
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    let payload = {
+      name: username,
+      email: email,
+      password: password,
+      phone: phoneNumber,
+    };
+    await userSignup(payload);
     // Handle signup logic here
   };
 
@@ -41,56 +53,26 @@ export default function SignupPage() {
             <h1 className="text-3xl font-bold">Sign Up</h1>
             <p className="text-gray-400">
               Create your account to get started. Already have an account?{" "}
-              <a href="#" className="text-blue-500 hover:underline">
+              <span className="text-blue-500 hover:underline cursor-pointer">
                 Log in
-              </a>
+              </span>
               .
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="username" className="block text-sm font-medium">
-                Username
+                Name
               </label>
               <input
-                id="username"
-                name="username"
+                id="name"
+                name="name"
                 type="text"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Your username"
-              />
-            </div>
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-medium">
-                First Name
-              </label>
-              <input
-                id="firstName"
-                name="firstName"
-                type="text"
-                required
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Your first name"
-              />
-            </div>
-            <div>
-              <label htmlFor="lastName" className="block text-sm font-medium">
-                Last Name
-              </label>
-              <input
-                id="lastName"
-                name="lastName"
-                type="text"
-                required
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Your last name"
+                placeholder="Your username/name"
               />
             </div>
             <div>
@@ -124,18 +106,18 @@ export default function SignupPage() {
               />
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium">
-                Confirm Password
+              <label htmlFor="password" className="block text-sm font-medium">
+                Phone Number
               </label>
               <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
+                id="phone"
+                name="phone"
+                type="text"
                 required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="••••••••"
+                placeholder="Your Phone Number"
               />
             </div>
             <div className="flex items-center">
@@ -164,57 +146,13 @@ export default function SignupPage() {
               </button>
             </div>
           </form>
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-900 text-gray-400">or</span>
-              </div>
-            </div>
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <div>
-                <a
-                  href="#"
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-700 rounded-md shadow-sm text-sm font-medium text-gray-400 bg-gray-800 hover:bg-gray-700"
-                >
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-                  </svg>
-                  Google
-                </a>
-              </div>
-              <div>
-                <a
-                  href="#"
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-700 rounded-md shadow-sm text-sm font-medium text-gray-400 bg-gray-800 hover:bg-gray-700"
-                >
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M22.1484 12.2891C22.1484 9.63281 20.6719 7.35938 18.4688 6.14062C18.5391 7.54688 17.8828 8.92969 16.8281 9.98438C15.7734 11.0625 14.3906 11.7891 12.7734 11.6719C12.7266 11.6719 12.6328 11.6484 12.4922 11.625C12.5156 11.4844 12.5391 11.3438 12.5625 11.2266C12.7266 10.4062 13.0547 9.49219 13.5703 8.53125C14.0391 7.66406 14.7188 6.79688 15.6797 6.14062C16.6172 5.50781 17.7891 5.08594 19.1719 5.0625C19.2891 4.03125 19.1953 3.02344 18.9141 2.0625C16.8047 2.15625 14.9062 2.97656 13.2891 4.35938C11.6953 5.71875 10.4297 7.54688 9.82031 9.51562C9.65625 9.42188 9.49219 9.35156 9.30469 9.28125C6.49219 8.0625 3.30469 9.23438 1.85156 11.9062C0.398438 14.5781 1.07812 17.9062 3.5625 19.8516C4.80469 20.8359 6.30469 21.3984 7.875 21.4219C9.44531 21.4453 10.9688 20.9297 12.2344 19.9922C13.4062 19.125 14.3203 17.9297 14.9062 16.5234C15.0938 16.0547 15.2344 15.5859 15.3281 15.1172C15.6797 15.1641 16.0547 15.1875 16.4297 15.1875C18.0938 15.1875 19.6875 14.5547 20.9297 13.3828C21.7266 12.6328 22.1484 11.6016 22.1484 10.5C22.1484 11.0859 22.1484 11.6719 22.1484 12.2891Z" />
-                  </svg>
-                  Apple
-                </a>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <div className="hidden lg:flex flex-1 items-center justify-center bg-gray-800">
         <img
           src="/images/shopping.jpg"
           alt="Signup illustration"
-          className="max-w-md"
+          className="w-full h-[100%]"
         />
       </div>
     </div>

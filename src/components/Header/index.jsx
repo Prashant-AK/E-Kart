@@ -1,34 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { User, ShoppingCart, Search, ChevronDown } from "lucide-react";
 import useCustomNavigation from "../../hooks/useCustomNavigation";
 
 export default function Header() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [user, setUser] = useState(null); // To store user data
   const navigate = useCustomNavigation();
+
+  // Function to handle dropdown toggle
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
+  // Handle search query changes
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
+  // Handle search submission
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // Implement search functionality here
     console.log("Search Query:", searchQuery);
   };
 
+  // Handle navigation
   const handleNavigate = (path = "") => {
     if (path !== "") {
       navigate(path);
     }
   };
+
+  // Handle logout
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
   };
+
+  // Fetch user data if token is present
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    console.log("Token: ", token);
+  }, []);
+
   return (
     <header className="font-sans">
       {/* Main header */}
@@ -75,57 +89,69 @@ export default function Header() {
               <ShoppingCart size={24} />
             </a>
 
-            {/* User Avatar with Dropdown */}
-            <div className="relative">
+            {/* If user is not logged in, show Login button */}
+            {!user ? (
               <button
-                onClick={handleDropdownToggle}
-                className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+                onClick={() => handleNavigate("/login")}
+                className="text-gray-600 hover:text-blue-600 transition-colors"
               >
-                <img
-                  src="https://via.placeholder.com/40" // Placeholder for user avatar
-                  alt="User Avatar"
-                  className="rounded-full w-10 h-10" // Increased avatar size
-                />
-                <span className="ml-2 text-gray-800 text-lg">John Doe</span>
-                <ChevronDown size={20} className="ml-1" />
+                Login
               </button>
+            ) : (
+              // If user is logged in, show avatar and dropdown
+              <div className="relative">
+                <button
+                  onClick={handleDropdownToggle}
+                  className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+                >
+                  <img
+                    src={user.avatarUrl || "https://via.placeholder.com/40"} // Use fetched user avatar
+                    alt="User Avatar"
+                    className="rounded-full w-10 h-10"
+                  />
+                  <span className="ml-2 text-gray-800 text-lg">
+                    {user.name || "John Doe"}
+                  </span>
+                  <ChevronDown size={20} className="ml-1" />
+                </button>
 
-              {/* Dropdown Menu */}
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-10">
-                  <ul>
-                    <li>
-                      <p
-                        onClick={() => {
-                          handleNavigate("/my-orders");
-                        }}
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                      >
-                        My Orders
-                      </p>
-                    </li>
-                    <li>
-                      <p
-                        onClick={() => {
-                          handleNavigate("/profile");
-                        }}
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                      >
-                        My Profile
-                      </p>
-                    </li>
-                    <li>
-                      <p
-                        onClick={() => handleLogout()}
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                      >
-                        Logout
-                      </p>
-                    </li>
-                  </ul>
-                </div>
-              )}
-            </div>
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-10">
+                    <ul>
+                      <li>
+                        <p
+                          onClick={() => {
+                            handleNavigate("/my-orders");
+                          }}
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                        >
+                          My Orders
+                        </p>
+                      </li>
+                      <li>
+                        <p
+                          onClick={() => {
+                            handleNavigate("/profile");
+                          }}
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                        >
+                          My Profile
+                        </p>
+                      </li>
+                      <li>
+                        <p
+                          onClick={() => handleLogout()}
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                        >
+                          Logout
+                        </p>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

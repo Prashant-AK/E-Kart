@@ -1,17 +1,17 @@
 import apiSlice from "../ApiSlice";
 
-export const searchApiSlice = apiSlice.injectEndpoints({
+export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     userLogin: builder.mutation({
       query: (payload) => ({
-        url: `/auth/login`,
+        url: `/users/login`,
         method: "POST",
         body: payload,
       }),
     }),
     userSignup: builder.mutation({
       query: (payload) => ({
-        url: `/auth/user/register`,
+        url: `/users/register`,
         method: "POST",
         body: payload,
       }),
@@ -19,4 +19,4 @@ export const searchApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useUserLoginMutation, useUserSignupMutation } = searchApiSlice;
+export const { useUserLoginMutation, useUserSignupMutation } = authApiSlice;
