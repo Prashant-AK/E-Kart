@@ -30,7 +30,7 @@ const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReAuth,
   tagTypes: [], // Use an empty array instead of an empty string
-  endpoints: (builder) => ({}), // An empty object if no endpoints are defined yet
+  endpoints: (builder) => ({}),
 });
 
 const getHeaders = (customheaders) => {
