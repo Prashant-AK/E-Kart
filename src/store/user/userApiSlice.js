@@ -12,6 +12,9 @@ export const UserApiSlice = apiSlice.injectEndpoints({
       query: (payload) => ({
         url: `/users/${payload.id}`,
         method: "GET",
+        headers: {
+          Authorization: `Bearer ${payload.access_token}`,
+        },
       }),
     }),
     createUser: builder.mutation({

@@ -1,23 +1,32 @@
 import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { useUserLoginMutation } from "../../store/auth/authApiSlice";
 import useCustomNavigation from "../../hooks/useCustomNavigation";
+import { setUserData } from "../../store/auth/authSlice";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useCustomNavigation();
+  const dispatch = useDispatch();
   const [userLogin, { data: loginData, isLoading }] = useUserLoginMutation();
 
   useEffect(() => {
     if (loginData && !loginData.isAdmin) {
       localStorage.setItem("access_token", loginData.token);
+      localStorage.setItem("user_id", loginData.userId);
+      localStorage.setItem("name", loginData.name);
+      dispatch(setUserData(loginData));
       navigate("/");
     }
     if (loginData && loginData.isAdmin) {
       localStorage.setItem("access_token", loginData.token);
+      localStorage.setItem("user_id", loginData.userId);
+      localStorage.setItem("name", loginData.name);
+      dispatch(setUserData(loginData));
       navigate("/dashboard");
     }
-  },[loginData]);
+  }, [loginData]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle login logic here

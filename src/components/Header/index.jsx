@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { User, ShoppingCart, Search, ChevronDown } from "lucide-react";
 import useCustomNavigation from "../../hooks/useCustomNavigation";
+import { useGetUserByIdMutation } from "../../store/user/userApiSlice";
+// import { selectCartCount } from "../../store/cart/cartSlice";
 
 export default function Header() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [user, setUser] = useState(null); // To store user data
+  const [user, setUser] = useState(null); // Store user data
+  const [getUserById, { data, isLoading }] = useGetUserByIdMutation();
   const navigate = useCustomNavigation();
-
-  // Function to handle dropdown toggle
+  const cartItemCount = 1;
+  // console.log("cartItemCount", cartItemCount);
+  // // Function to handle dropdown toggle
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -34,14 +39,36 @@ export default function Header() {
   // Handle logout
   const handleLogout = () => {
     localStorage.clear();
+    setUser(null); // Clear the user state
     navigate("/login");
   };
 
   // Fetch user data if token is present
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    console.log("Token: ", token);
-  }, []);
+    const storedUserName = localStorage.getItem("name");
+
+    if (storedUserName) {
+      // If user name is present in localStorage, set it
+      setUser({ name: storedUserName });
+    } else if (token) {
+      const userId = localStorage.getItem("user_id");
+      if (userId) {
+        // Fetch user details using user ID if not available in localStorage
+        getUserById({ id: userId, access_token: token })
+          .unwrap()
+          .then((userData) => {
+            console.log("User data:", userData);
+            setUser(userData); // Set the fetched user data
+            localStorage.setItem("name", userData.name); // Save name to localStorage for future use
+          })
+          .catch((error) => {
+            console.error("Failed to fetch user data:", error);
+            setUser(null); // Clear user if fetch fails
+          });
+      }
+    }
+  }, [getUserById]);
 
   return (
     <header className="font-sans">
@@ -81,15 +108,16 @@ export default function Header() {
           {/* User actions */}
           <div className="flex items-center space-x-6">
             {/* Shopping Cart Icon */}
-            <a
-              href="#"
-              aria-label="Shopping cart"
-              className="text-gray-600 hover:text-blue-600 transition-colors"
-            >
+            <div className="relative" onClick={() => navigate("/mycart")}>
               <ShoppingCart size={24} />
-            </a>
+              {cartItemCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                  {cartItemCount}
+                </span>
+              )}
+            </div>
 
-            {/* If user is not logged in, show Login button */}
+            {/* User authentication */}
             {!user ? (
               <button
                 onClick={() => handleNavigate("/login")}
@@ -98,14 +126,13 @@ export default function Header() {
                 Login
               </button>
             ) : (
-              // If user is logged in, show avatar and dropdown
               <div className="relative">
                 <button
                   onClick={handleDropdownToggle}
                   className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
                 >
                   <img
-                    src={user.avatarUrl || "https://via.placeholder.com/40"} // Use fetched user avatar
+                    src={user.avatarUrl || "https://via.placeholder.com/40"}
                     alt="User Avatar"
                     className="rounded-full w-10 h-10"
                   />
@@ -121,9 +148,7 @@ export default function Header() {
                     <ul>
                       <li>
                         <p
-                          onClick={() => {
-                            handleNavigate("/my-orders");
-                          }}
+                          onClick={() => handleNavigate("/my-orders")}
                           className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                         >
                           My Orders
@@ -131,9 +156,7 @@ export default function Header() {
                       </li>
                       <li>
                         <p
-                          onClick={() => {
-                            handleNavigate("/profile");
-                          }}
+                          onClick={() => handleNavigate("/profile")}
                           className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                         >
                           My Profile

@@ -34,7 +34,7 @@ const apiSlice = createApi({
 });
 
 const getHeaders = (customheaders) => {
-  const accessToken = localStorage.getItem("token");
+  const accessToken = localStorage.getItem("access_token");
 
   const defaultHeaders = {
     Accept: "application/json",
