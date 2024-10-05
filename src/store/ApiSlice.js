@@ -7,9 +7,13 @@ const apiService = axios.create({});
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.REACT_APP_API_URL,
   prepareHeaders: async (headers) => {
+    const accessToken = localStorage.getItem("access_token");
+
+    headers.set("Accept", "application/json");
     headers.set("Content-Type", "application/json");
     headers.set("Access-Control-Allow-Origin", "*");
     headers.set("ngrok-skip-browser-warning", "69420");
+    headers.set("AUTHORIZATION", `Bearer ${accessToken}`);
 
     return headers;
   },
