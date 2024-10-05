@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import toast from "react-hot-toast";
 import axios from "axios";
 
-const apiService = axios.create({});
+// const apiService = axios.create({});
 
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.REACT_APP_API_URL,
@@ -10,7 +10,7 @@ const baseQuery = fetchBaseQuery({
     headers.set("Content-Type", "application/json");
     headers.set("Access-Control-Allow-Origin", "*");
     headers.set("ngrok-skip-browser-warning", "69420");
-
+    headers.set("Authorization", `Bearer ${localStorage.getItem("token")}`);
     return headers;
   },
 });
@@ -38,7 +38,7 @@ const getHeaders = (customheaders) => {
 
   const defaultHeaders = {
     Accept: "application/json",
-    AUTHORIZATION: `Bearer ${accessToken}`,
+    authorization: `Bearer ${accessToken}`,
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
   };
@@ -49,12 +49,12 @@ const getHeaders = (customheaders) => {
   return headers;
 };
 
-export const postWithoutUserFormData = (path, payload) =>
-  apiService.post(`${process.env.REACT_APP_API_URL}${path}`, payload, {
+export const postUserFormData = (path, payload) =>
+  axios.post(`${process.env.REACT_APP_API_URL}${path}`, payload, {
     headers: getHeaders({ "Content-Type": "multipart/form-data" }),
   });
-export const putWithoutUserFormData = (path, payload) =>
-  apiService.put(`${process.env.REACT_APP_API_URL}${path}`, payload, {
+export const putUserFormData = (path, payload) =>
+  axios.put(`${process.env.REACT_APP_API_URL}${path}`, payload, {
     headers: getHeaders({ "Content-Type": "multipart/form-data" }),
   });
 
