@@ -1,28 +1,15 @@
-import React, { useState } from "react";
-import { Trash2, Edit, Eye } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Trash2, Eye } from "lucide-react";
+import toast from "react-hot-toast";
+
+import { ChangeDateFormat } from "../../utils/helper.js";
+import {
+  useDeleteOrderMutation,
+  useGetAllOrdersMutation,
+} from "../../store/order/orderApiSlice";
 
 const OrdersView = () => {
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      customer: "John Doe",
-      date: "2024-09-28",
-      status: "Pending",
-      total: 199.99,
-      items: [
-        { productName: "Product 1", quantity: 2, price: 50 },
-        { productName: "Product 2", quantity: 1, price: 99.99 },
-      ],
-    },
-    {
-      id: 2,
-      customer: "Jane Smith",
-      date: "2024-09-27",
-      status: "Shipped",
-      total: 299.99,
-      items: [{ productName: "Product 3", quantity: 3, price: 100 }],
-    },
-  ]);
+  const [orders, setOrders] = useState([]);
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [statusOptions] = useState([
@@ -31,6 +18,26 @@ const OrdersView = () => {
     "Delivered",
     "Cancelled",
   ]);
+  const [getAllOrders, { isLoading, data: AllOrderList }] =
+    useGetAllOrdersMutation();
+  const [deleteOrder, { isLoading: deleting, data: deleteOrderResponse }] =
+    useDeleteOrderMutation();
+
+  useEffect(() => {
+    getAllOrders();
+  }, []);
+
+  useEffect(() => {
+    if (AllOrderList) {
+      setOrders(AllOrderList);
+    }
+  }, [AllOrderList]);
+  useEffect(() => {
+    if (deleteOrderResponse) {
+      toast.success("Order deleted successfully");
+      getAllOrders();
+    }
+  }, [deleteOrderResponse]);
 
   const updateOrderStatus = (orderId, newStatus) => {
     setOrders(
@@ -44,14 +51,13 @@ const OrdersView = () => {
     setSelectedOrder(order);
   };
 
-  const deleteOrder = (orderId) => {
-    setOrders(orders.filter((order) => order.id !== orderId));
+  const handleDeleteOrder = (orderId) => {
+    deleteOrder({ id: orderId });
   };
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold mb-4">Manage Orders</h2>
-
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gray-100">
@@ -64,15 +70,17 @@ const OrdersView = () => {
           </tr>
         </thead>
         <tbody>
-          {orders.map((order) => (
-            <tr key={order.id}>
-              <td className="border p-2">{order.id}</td>
-              <td className="border p-2">{order.customer}</td>
-              <td className="border p-2">{order.date}</td>
+          {orders?.map((order) => (
+            <tr key={order?.id}>
+              <td className="border p-2">{order?.id}</td>
+              <td className="border p-2">{order?.user?.name}</td>
+              <td className="border p-2">
+                {ChangeDateFormat(order?.dateOrdered)}
+              </td>
               <td className="border p-2">
                 <select
                   value={order.status}
-                  onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                  onChange={(e) => updateOrderStatus(order?.id, e.target.value)}
                   className="border rounded-md px-3 py-1"
                 >
                   {statusOptions.map((status) => (
@@ -82,7 +90,7 @@ const OrdersView = () => {
                   ))}
                 </select>
               </td>
-              <td className="border p-2">${order.total.toFixed(2)}</td>
+              <td className="border p-2">${order?.totalPrice?.toFixed(2)}</td>
               <td className="border p-2 text-right space-x-2">
                 <button
                   onClick={() => viewOrderDetails(order)}
@@ -91,7 +99,7 @@ const OrdersView = () => {
                   <Eye className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => deleteOrder(order.id)}
+                  onClick={() => handleDeleteOrder(order?.id)}
                   className="bg-red-500 text-white p-1 rounded-md hover:bg-red-600"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -108,27 +116,28 @@ const OrdersView = () => {
           <div className="bg-white p-6 rounded-md shadow-lg w-1/2">
             <h3 className="text-xl font-semibold mb-4">Order Details</h3>
             <p>
-              <strong>Order ID:</strong> {selectedOrder.id}
+              <strong>Order ID:</strong> {selectedOrder?.id}
             </p>
             <p>
-              <strong>Customer:</strong> {selectedOrder.customer}
+              <strong>Customer:</strong> {selectedOrder?.user?.name}
             </p>
             <p>
-              <strong>Date:</strong> {selectedOrder.date}
+              <strong>Date:</strong>
+              {ChangeDateFormat(selectedOrder?.dateOrdered)}
             </p>
             <p>
-              <strong>Status:</strong> {selectedOrder.status}
+              <strong>Status:</strong> {selectedOrder?.status}
             </p>
             <p>
-              <strong>Total:</strong> ${selectedOrder.total.toFixed(2)}
+              <strong>Total:</strong> ${selectedOrder?.totalPrice?.toFixed(2)}
             </p>
 
             <h4 className="mt-4 mb-2 font-semibold">Items Ordered</h4>
             <ul className="space-y-2">
-              {selectedOrder.items.map((item, index) => (
+              {selectedOrder?.orderItems?.map((item, index) => (
                 <li key={index} className="border-b py-2">
-                  {item.productName} - {item.quantity} x $
-                  {item.price.toFixed(2)}
+                  {item.product?.name} - {item?.quantity} x $
+                  {item?.product?.price?.toFixed(2)}
                 </li>
               ))}
             </ul>
